@@ -1,14 +1,12 @@
 import dotenv from "dotenv"
 import app from "./src/app.js"
-import connectdb from "./src/db/db.js"
-
+import conntectDB from "./src/db/db.js"
 
 dotenv.config()
-connectdb()
-
-const port = process.env.PORT
+conntectDB()
 
 
-app.listen(port || 3000,()=>{
-console.log("Server is connected on port 3000")
+
+app.listen(3000,()=>{
+    console.log("Server is created successfully")
 })

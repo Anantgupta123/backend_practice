@@ -1,22 +1,21 @@
-import userModel from "../models/auth.model.js"
+import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken"
-import tokenBlacklistedModel from "../models/tokenblacklist.model.js"
-
-
+import tokenBlacklistedModel from "../models/tokenBlacklisted.model.js";
 
 async function userRegister(req,res){
 
-    const {name , email , password}  = req.body;
+    const {name,email,password} =req.body;
 
-    const isEmailExist = await userModel.findOne({email:email})
+    const isEmailExist = await userModel.findOne({email:email}).select("+password")
 
     if(isEmailExist){
-        return res.status(401).json({
-            message:"This email is already exist try another"
+
+        return res.status(402).json({
+            message:"This email is already exist"
         })
     }
-
-    const user = userModel.create({
+    
+    const user = await userModel.create({
         name,
         email,
         password
@@ -24,71 +23,79 @@ async function userRegister(req,res){
 
     const token = jwt.sign({userId:user._id},process.env.JWT_SECRET,{expiresIn:"3d"})
 
+
     res.cookie("token",token)
 
-    res.status(201).json({
+    res.status(200).json({
         user:{
-            userId:user._id,
-            user:(await user).name,
-            email:(await user).email
-        },
-        token:token
+        user:user.name,
+        email:user.email,
+        password:user.password,
+    },
+    token:token
     })
-
 
 
 }
 
 async function userLogin(req,res){
 
-    const {email,password}  = req.body;
+    const {email,password} = req.body;
 
-    const user = await userModel.findOne({email}).select("+password")
+    const user = await userModel.findOne({email:email});
 
     if(!user){
-        return res.status(401).json({
-            message:"Invalid email address"
+        return res.status(409).json({
+            message:"This user not exist"
         })
     }
 
-    const isValidPassword = await user.comparePassword(password)
+    const isvalidpassword = await  user.comparePassword(password)
 
-    if(!isValidPassword){
-        return res.status(401).json({
-            message:"The password is wron try again"
+    if(!isvalidpassword){
+        return res.status(402).json({
+            message:"Wron password"
         })
     }
 
-    const token = await jwt.sign({userId:user._id},process.env.JWT_SECRET,{expiresIn:"3d"})
+    const token = jwt.sign({userId:user},process.env.JWT_SECRET,{expiresIn:"3d"})
+
 
     res.cookie("token",token)
 
-    res.status(201).json({
-        message:"User loging successfull",
+    res.status(200).json({
+        user:{
         user:user.name,
-        email:user.email
+        email:user.email,
+        password:user.password,
+    },
+    token:token
     })
+
 }
 
 async function userLogout(req,res){
 
-    const token = req.cookies.token || req.headers.authorization?.split("")[1]
+    const token = req.cookies.token || req.headers.authorization?.split('')[1];
 
     if(!token){
-        res.status(200).json({
-            message:"user logout successfully"
+        return res.status(400).json({
+            message:"You dont have token"
         })
     }
 
-    await tokenBlacklistedModel.create({
-        token:token
-    })
+    const black = await tokenBlacklistedModel.updateOne(
+        { token: token },
+        { token: token },
+        { upsert: true }
+    )
 
     res.clearCookie("token")
 
-    res.status(201).json({
-        mesage:"User logout successfull"
+    return res.status(200).json({
+        message:"User logout successfully"
     })
+
 }
 
 export default {userRegister,userLogin,userLogout}
