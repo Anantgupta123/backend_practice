@@ -1,4 +1,5 @@
 import userModel from "../models/user.model.js";
+import tokenBlacklistedModel from "../models/tokenBlacklisted.model.js"
 import jwt from "jsonwebtoken"
 
 async function authMiddleware(req,res,next){
@@ -8,6 +9,14 @@ async function authMiddleware(req,res,next){
     if(!token){
         return res.status(402).json({
             message:"You don't hava token"
+        })
+    }
+
+    const balcklisted = await tokenBlacklistedModel.findOne({token})
+
+    if(balcklisted){
+        return res.status(402).json({
+            message:"Your token is not not valid"
         })
     }
 
