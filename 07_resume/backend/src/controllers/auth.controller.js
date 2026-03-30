@@ -42,7 +42,7 @@ async function userRegister(req,res){
         password:hash
     })
 
-    const token = jwt.sign({userId:user._id,username:user.username},process.env.JWT_SECRET,{expiresIn:"3d"})
+    const token = jwt.sign({id:user._id,username:user.username},process.env.JWT_SECRET,{expiresIn:"3d"})
 
     res.cookie("token",token);
 
@@ -63,7 +63,6 @@ async function userRegister(req,res){
 async function userLogin(req,res){
 
     const {email,password} = req.body;
-    console.log(req.body)
 
     const user = await userModel.findOne({email});
 
@@ -83,7 +82,7 @@ async function userLogin(req,res){
         })
     }
 
-    const token = jwt.sign({userId:user._id,username:user.username},process.env.JWT_SECRET,{expiresIn:"3d"})
+    const token = jwt.sign({id:user._id,username:user.username},process.env.JWT_SECRET,{expiresIn:"3d"})
 
     res.cookie("token",token)
 
@@ -127,11 +126,27 @@ async function userLogout(req,res){
 }
 
 
+async function getCurrentUser(req,res){
+
+    const user = await userModel.findById(req.user.id)
+
+    res.status(200).json({
+        message:"Your current user ",
+        user:{
+            id:user._id,
+            username:user.username,
+            email:user.email,
+            password:user.password
+        }
+    })
+}
+
 
 
 
 module.exports = {
     userRegister,
     userLogin,
-    userLogout
+    userLogout,
+    getCurrentUser
 }
