@@ -6,9 +6,9 @@ const technicalQuestionSchema = new mongoose.Schema({
         type:String,
         require:[true,"TechnicalQuestion is required"]
     },
-    intension:{
+    intention:{
         type:String,
-        require:[true,"Intension is required"]
+        require:[true,"Intention is required"]
     },
     answer:{
         type:String,
@@ -22,11 +22,11 @@ const technicalQuestionSchema = new mongoose.Schema({
 const behaviralQuestionSchema = new mongoose.Schema({
     question:{
         type:String,
-        require:[true,"TechnicalQuestion is required"]
+        required:[true,"TechnicalQuestion is required"]
     },
-    intension:{
+    intention:{
         type:String,
-        require:[true,"Intension is required"]
+        required:[true,"Intention is required"]
     },
     answer:{
         type:String,
@@ -56,8 +56,13 @@ const preprationPlaneSchema= new mongoose.Schema({
         required:[true,"Day is required"]
     },
     focus:{
-        type:PerformanceServerTiming,
+        type:String,
         required:[true,"Focus is required"]
+    },
+    task:{
+        type:String,
+        required:[true,"Task is required"]
+
     }
 },{
     _id:false
@@ -83,11 +88,16 @@ const interViwereportSchema = new mongoose.Schema({
     },
     technicalQuestions:[technicalQuestionSchema],
 
-    behaviralQuestions:[behaviralQuestionSchema],
+    behavioralQuestions:[behaviralQuestionSchema],
 
     skillGaps:[skillGapSchema],
 
-    preprationPlanes:[preprationPlaneSchema]
+    preprationPlane:[preprationPlaneSchema],
+
+    user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
+    }
 
 },{
     timestamps:true

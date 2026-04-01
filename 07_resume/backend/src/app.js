@@ -1,7 +1,7 @@
 const express = require("express");
-const authRouter = require("./routes/auth.route.js")
 const Cookieparser = require("cookie-parser")
 const cors = require("cors")
+
 
 // use all packeges
 const app = express();
@@ -14,9 +14,14 @@ app.use(cors({
     credentials:true
 }))
 
+const authRouter = require("./routes/auth.route.js")
+const interviewRouter = require("./routes/interview.route.js");
+
+
 
 
 app.use("/api/auth",authRouter)
+app.use("/api/interview",interviewRouter)
 
 
 
